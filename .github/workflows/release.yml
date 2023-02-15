@@ -1,0 +1,30 @@
+name: release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set output variables
+        id: vars
+        run: |
+          filename="${{ vars.FACTORIO_MOD_NAME }}_${{ github.event.release.tag_name }}"
+          echo "filename=$filename" >> $GITHUB_OUTPUT
+      - run: git archive --prefix "${{ steps.vars.outputs.filename }}/" -o "./${{ steps.vars.outputs.filename }}.zip" "${{ github.event.release.tag_name }}"
+      - uses: Shopify/upload-to-release@9942a4c936dab172f7101dcc7dc20528ea949102
+        with:
+          name: ${{ steps.vars.outputs.filename }}.zip
+          path: ${{ steps.vars.outputs.filename }}.zip
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          content-type: application/zip
+      - name: Upload to Factorio 
+        uses: mchangrh/factorio-mod-upload@v1
+        with:
+          mod-name: ${{ vars.FACTORIO_MOD_NAME }}
+        env:
+          FACTORIO_MODS_TOKEN: ${{ secrets.FACTORIO_TOKEN }}
+          FILENAME: ${{ steps.vars.outputs.filename }}.zip

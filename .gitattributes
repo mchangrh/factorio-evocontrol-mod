@@ -1,0 +1,5 @@
+.gitattributes export-ignore
+.gitignore export-ignore
+.github export-ignore
+LICENSE export-ignore
+thumbail.psd export-ignore
